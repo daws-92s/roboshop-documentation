@@ -20,13 +20,21 @@ dnf install maven java-25-openjdk-devel -y
 `dnf install maven` also brings an older Java (21), and Maven uses it by default. This application needs Java 25, so make Java 25 the default **once**:
 
 ```shell
-alternatives --set java java-25-openjdk.x86_64
-echo 'export JAVA_HOME=/usr/lib/jvm/java-25-openjdk' > /etc/profile.d/java.sh
-source /etc/profile.d/java.sh
+alternatives --config java
 ```
 
-- `alternatives --set java` makes the `java` command point to Java 25.
-- `JAVA_HOME` tells Maven which Java to use. Files in `/etc/profile.d/` run at every login, so you never have to type it again, even after a reboot.
+It lists the installed Java versions. Type the number of the line with `java-25-openjdk` and press Enter. Now the `java` command points to Java 25.
+
+Maven needs `JAVA_HOME`, the Java 25 folder. The folder name contains the full version, so take it from the `java` command instead of typing it:
+
+```shell
+echo "export JAVA_HOME=$(dirname $(dirname $(readlink -f /usr/bin/java)))" > /etc/profile.d/java.sh
+source /etc/profile.d/java.sh
+echo $JAVA_HOME
+```
+
+- `readlink -f /usr/bin/java` gives the real file, for example `/usr/lib/jvm/java-25-openjdk-25.0.1.0.8-1.el9.x86_64/bin/java`. The two `dirname` remove `/bin/java` from the end.
+- Files in `/etc/profile.d/` run at every login, so you never have to type it again, even after a reboot.
 
 Verify:
 
@@ -35,7 +43,7 @@ java -version
 mvn -v
 ```
 
-Both should show version `25`. If the folder name is different on your server, check with `ls /usr/lib/jvm`.
+Both should show version `25`.
 
 ---
 
@@ -155,6 +163,7 @@ curl http://localhost:8080/codes
 |---------|---------|
 | Log shows `Access denied for user 'shipping'` | `app-user.sql` was not loaded |
 | Log shows `Communications link failure` | Shipping cannot reach MySQL: check the IP and port 3306 in the security group |
+| Log shows `Cannot find any provider supporting RSA/ECB/OAEPWithSHA-1AndMGF1Padding` | Old `shipping-v4.zip` that connects to MySQL without TLS. Download the zip again and rebuild |
 | `503` from `/codes` | MySQL went down while shipping was running |
 | `502` from `/confirm/...` | Shipping cannot reach Cart |
 
