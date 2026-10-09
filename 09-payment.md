@@ -76,7 +76,7 @@ Environment=USER_PORT=8080
 Environment=AMQP_HOST=<RABBITMQ-SERVER-IPADDRESS>
 Environment=AMQP_USER=roboshop
 Environment=AMQP_PASS=roboshop123
-ExecStart=/app/.venv/bin/gunicorn --config gunicorn.conf.py payment:app
+ExecStart=/app/.venv/bin/gunicorn --config gunicorn.conf.py --no-control-socket payment:app
 SyslogIdentifier=payment
 Restart=on-failure
 RestartSec=5
@@ -88,6 +88,8 @@ WantedBy=multi-user.target
 > **Replace `<CART-SERVER-IPADDRESS>`, `<USER-SERVER-IPADDRESS>` and `<RABBITMQ-SERVER-IPADDRESS>` with the private IPs of those servers.**
 
 The service now runs as `roboshop` instead of `root`. `payment:app` means "the `app` object in `payment.py`".
+
+`--no-control-socket`: gunicorn 25 and newer opens a control socket in the home folder of the user, here `/app/.gunicorn`. `roboshop` cannot write to `/app`, so the log shows `Control server error: [Errno 13] Permission denied`. The application does not need this socket, so it is turned off.
 
 Optional settings:
 
