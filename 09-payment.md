@@ -7,7 +7,13 @@ Payment handles the checkout. For each order it:
 3. puts the order in the RabbitMQ `orders` queue, where Dispatch picks it up
 4. saves the order in the user's history and empties the cart
 
-Payment is written in Python with Flask. **gunicorn** is the server that runs the Flask application. It replaces uWSGI from the older version, and it is pure Python, so no compiler (`gcc`) is needed anymore.
+Payment is written in Python with Flask. Flask's built-in server is only for development, so in production **gunicorn** runs the Flask application. It:
+
+- listens on port 8080 and passes each request to the Flask code
+- runs workers and threads, so many requests are handled at the same time
+- restarts a worker when it crashes
+
+It does the same job as PM2 for Node.js. It replaces uWSGI from the older version, and it is pure Python, so no compiler (`gcc`) is needed anymore.
 
 > **Developer has chosen Python. Check with the developer which version is needed. This setup requires Python >= 3.14.**
 

@@ -40,7 +40,14 @@ unzip /tmp/dispatch.zip
 
 ## Build the Application
 
-The developer ships `go.mod` and `go.sum`. They list the libraries and their exact versions, like `package.json` and `package-lock.json` in Node.js. So there is no need for `go mod init` or `go get`:
+The developer ships `go.mod` and `go.sum`, so there is no need for `go mod init` or `go get`:
+
+| Go | Node.js | What it holds |
+|----|---------|---------------|
+| `go.mod` | `package.json` | Module name, Go version, the libraries and their versions |
+| `go.sum` | `package-lock.json` (partly) | A checksum of every library |
+
+In Node.js, `package.json` usually has version ranges like `^4.18.0`, and `package-lock.json` fixes the exact version. In Go, `go.mod` already has exact versions like `v1.10.0`. `go.sum` only checks that a downloaded library was not changed: if the checksum does not match, the build stops. Both files are committed to Git.
 
 ```shell
 cd /app
